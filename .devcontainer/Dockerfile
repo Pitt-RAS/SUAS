@@ -29,6 +29,9 @@ RUN apt-get update \
     # Install C++ tools
     && apt-get -y install build-essential cmake cppcheck valgrind \
     #
+    # temporary addition of the rosserial install to verify items
+    && apt-get install -y ros-melodic-rosserial \
+    #
     # Install Docker CE CLI
     && apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common lsb-release \
     && curl -fsSL https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]')/gpg | (OUT=$(apt-key add - 2>&1) || echo $OUT) \
