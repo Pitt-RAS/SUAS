@@ -2,4 +2,100 @@
 
 namespace suas_planning {
 
+GlobalWaypointPlanner::GlobalWaypointPlanner(
+        ros::NodeHandle& nh,
+        double start_x,
+        double start_y,
+        double goal_x,
+        double goal_y,
+        std::vector<Obstacle> obstacles,
+        double radius=1.0,
+        double resolution=1.0) : 
+            nh_(nh),
+            start_x_(start_x),
+            start_y_(start_y),
+            goal_x_(goal_x),
+            goal_y_(goal_y),
+            vehicle_radius_(radius),
+            resolution_(resolution),
+            current_map_(ComputeMapSize(obstacles)),
+            map_meta_(&current_map_, ComputeMapWidth(obstacles), ComputeMapHeight(obstacles)) {
+        UpdateMap(obstacles);
+}
+
+void GlobalWaypointPlanner::ExpandObstaclesByRadius(std::vector<Obstacle>& obstacles) {
+    std::vector<Obstacle>::iterator obstacle_it;
+    for (obstacle_it = obstacles.begin(); obstacle_it != obstacles.end(); obstacle_it++) {
+        // Expand obstacle by vehicle radius so we can treat vehicle as point object
+        Obstacle curr_obstacle = *obstacle_it;
+        curr_obstacle.ExpandSize(vehicle_radius_);
+    }
+}
+
+// not meant to be used prior to ComputeMapSize
+// This is probably a terrible way of doing this, maybe just have obstacles be copied instead 
+// of being passed by reference.
+unsigned int GlobalWaypointPlanner::ComputeMapWidth(std::vector<Obstacle>& obstacles) {
+    int min_x = start_x_;
+    int max_x = goal_x_;
+    
+    // iterate through obstacles to compute maximum size
+    std::vector<Obstacle>::iterator obstacle_it;
+    for (obstacle_it = obstacles.begin(); obstacle_it != obstacles.end(); obstacle_it++) {
+        Obstacle curr_obstacle = *obstacle_it;
+        int current_min_x = curr_obstacle.GetMinX();
+        int current_max_x = curr_obstacle.GetMaxX();
+        if (current_min_x < min_x) {
+            min_x = current_min_x;
+        }
+        if (current_max_x > max_x) {
+            max_x = current_max_x;
+        }
+    }
+
+    return abs(max_x - min_x);
+}
+
+// not meant to be used prior to ComputeMapSize
+// This is probably a terrible way of doing this, maybe just have obstacles be copied instead 
+// of being passed by reference.
+unsigned int GlobalWaypointPlanner::ComputeMapHeight(std::vector<Obstacle>& obstacles) {
+    int min_y = start_y_;
+    int max_y = goal_y_;
+    
+    // iterate through obstacles to compute maximum size
+    std::vector<Obstacle>::iterator obstacle_it;
+    for (obstacle_it = obstacles.begin(); obstacle_it != obstacles.end(); obstacle_it++) {
+        Obstacle curr_obstacle = *obstacle_it;
+        int current_max_y = curr_obstacle.GetMaxY();
+        int current_min_y = curr_obstacle.GetMinY();
+        if (current_min_y < min_y) {
+            min_y = current_min_y;
+        }
+        if (current_max_y > max_y) {
+            max_y = current_max_y;
+        }
+    }
+
+    return abs(max_y - min_y);
+}
+
+// note to self: this is slightly flawed probably, everything needs to be reference to an absolute
+// reference, which I don't know yet; also this could be O(n) but for now we leave it as O(n^2)
+unsigned int GlobalWaypointPlanner::ComputeMapSize(std::vector<Obstacle>& obstacles) {
+    ExpandObstaclesByRadius(obstacles);
+    int width = ComputeMapWidth(obstacles);
+    int height = ComputeMapHeight(obstacles);
+    return width * height;
+}
+
+int GlobalWaypointPlanner::UpdateMap(std::vector<Obstacle>& obstacles) {
+    std::vector<Obstacle>::iterator obstacle_it;
+    for (obstacle_it = obstacles.begin(); obstacle_it != obstacles.end(); obstacle_it++) {
+        Obstacle curr_obstacle = *obstacle_it;
+        curr_obstacle.PlotObstacle(current_map_, map_meta_);
+    }
+    return obstacles.size();
+}
+
 }

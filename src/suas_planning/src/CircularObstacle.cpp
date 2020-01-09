@@ -14,6 +14,13 @@ CircularObstacle::CircularObstacle(double x, double y, double radius) {
     radius_ = (int) round(radius);
 }
 
+
+// expand radius of obstacle so we can treat vehicle a point object
+// preferentially rounding up to make sure we dont stray in.
+int CircularObstacle::ExpandSize(double vehicle_radius) {
+    radius_ += (int) ceil(vehicle_radius);
+}
+
 // Implementation of the midpoint circle algorithm; Taken/Adapted from Wikipedia/Rosetta Code
 // Assuming row major ordering for map and that the map is sufficiently large to rasterize
 // entire obstacles, i.e. no partial shapes
@@ -45,9 +52,10 @@ void CircularObstacle::PlotObstacle(std::vector<int8_t>& map, MapMetaInfo map_me
     }
 
 }
+
 // fills point with probablitiy value
-// Note due to preference for x axis to be horizontal, the indexing into the 
-// 2d array is [row][col]; [y][x] 
+// Note due to preference for x axis to be horizontal, the indexing into the
+// 2d array is [row][col]; [y][x]
 // Returns -1 if unable to plot plot
 int PlotPointProbablity(std::vector<int8_t>& map, int x, int y, MapMetaInfo map_meta, int8_t prob) {
     if (!Obstacle::CheckGridBounds(map, x, y, map_meta)) {
@@ -56,6 +64,22 @@ int PlotPointProbablity(std::vector<int8_t>& map, int x, int y, MapMetaInfo map_
     int index = Obstacle::GetLinearIndex(y, x, map_meta.width_);
     map[index] = prob;
     return index;
+}
+
+int CircularObstacle::GetMinX() {
+    return center_x_ - radius_;
+}
+
+int CircularObstacle::GetMaxX() {
+    return center_x_ + radius_;
+}
+
+int CircularObstacle::GetMinY() {
+    return center_y_ - radius_;
+}
+
+int CircularObstacle::GetMaxY() {
+    return center_y_ + radius_;
 }
 
 }
