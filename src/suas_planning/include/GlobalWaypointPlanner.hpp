@@ -6,6 +6,7 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <memory>
 #include <vector>
+#include <tuple>
 #include "PlanningPoints.hpp"
 
 namespace suas_planning{
@@ -19,6 +20,7 @@ class GlobalWaypointPlanner {
             double goal_x,
             double goal_y,
             std::vector<Obstacle> obstacles,
+            std::vector<Waypoint> waypoints,
             double radius=1.0,
             double resolution=1.0
         );
@@ -26,6 +28,7 @@ class GlobalWaypointPlanner {
         void SetGoal(double x, double y);
         void SetVehicleRadius(double radius);
         void AddObstacles(std::vector<Obstacle> obstacles);
+        void AddWaypoints(std::vector<Waypoint> waypoints);
 
     private:
         GlobalWaypointPlanner();
@@ -37,15 +40,14 @@ class GlobalWaypointPlanner {
         int UpdateMap(std::vector<Obstacle>& obstacles);
         ros::NodeHandle& nh_;
         std::vector<int8_t> current_map_;
+        std::vector<Waypoint> waypoints_;
         ros::Subscriber map_subscriber_;
         ros::Publisher plan_publisher_;
         MapMetaInfo::MapMetaInfo map_meta_;
+        Waypoint::Waypoint start_;
+        Waypoint::Waypoint goal_;
         double resolution_;
         double vehicle_radius_;
-        unsigned int start_x_;
-        unsigned int start_y_;
-        unsigned int goal_x_;
-        unsigned int goal_y_;
 
 };
 

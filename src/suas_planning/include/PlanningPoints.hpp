@@ -49,6 +49,15 @@ class CircularObstacle: public Obstacle {
         int PlotPointProbability(std::vector<int8_t>& map, int x, int y, MapMetaInfo map_meta, int8_t prob=100);
 };
 
+class Waypoint {
+    public:
+        Waypoint(double x, double y);
+        unsigned int x_;
+        unsigned int y_;
+    private:
+        Waypoint();
+};
+
 } // namespace suas_planning
 
 #endif

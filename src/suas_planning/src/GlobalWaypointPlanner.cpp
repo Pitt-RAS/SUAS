@@ -9,17 +9,17 @@ GlobalWaypointPlanner::GlobalWaypointPlanner(
         double goal_x,
         double goal_y,
         std::vector<Obstacle> obstacles,
+        std::vector<Waypoint> waypoints,
         double radius=1.0,
-        double resolution=1.0) : 
+        double resolution=1.0) :
             nh_(nh),
-            start_x_(start_x),
-            start_y_(start_y),
-            goal_x_(goal_x),
-            goal_y_(goal_y),
             vehicle_radius_(radius),
             resolution_(resolution),
             current_map_(ComputeMapSize(obstacles)),
-            map_meta_(&current_map_, ComputeMapWidth(obstacles), ComputeMapHeight(obstacles)) {
+            waypoints_(waypoints),
+            map_meta_(&current_map_, ComputeMapWidth(obstacles), ComputeMapHeight(obstacles)),
+            start_(start_x, start_y),
+            goal_(goal_x, goal_y) {
         UpdateMap(obstacles);
 }
 
@@ -36,8 +36,8 @@ void GlobalWaypointPlanner::ExpandObstaclesByRadius(std::vector<Obstacle>& obsta
 // This is probably a terrible way of doing this, maybe just have obstacles be copied instead 
 // of being passed by reference.
 unsigned int GlobalWaypointPlanner::ComputeMapWidth(std::vector<Obstacle>& obstacles) {
-    int min_x = start_x_;
-    int max_x = goal_x_;
+    int min_x = start_.x_;
+    int max_x = goal_.x_;
     
     // iterate through obstacles to compute maximum size
     std::vector<Obstacle>::iterator obstacle_it;
@@ -60,8 +60,8 @@ unsigned int GlobalWaypointPlanner::ComputeMapWidth(std::vector<Obstacle>& obsta
 // This is probably a terrible way of doing this, maybe just have obstacles be copied instead 
 // of being passed by reference.
 unsigned int GlobalWaypointPlanner::ComputeMapHeight(std::vector<Obstacle>& obstacles) {
-    int min_y = start_y_;
-    int max_y = goal_y_;
+    int min_y = start_.y_;
+    int max_y = goal_.y_;
     
     // iterate through obstacles to compute maximum size
     std::vector<Obstacle>::iterator obstacle_it;
