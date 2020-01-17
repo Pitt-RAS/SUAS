@@ -9,7 +9,7 @@
 #include <tuple>
 #include "PlanningPoints.hpp"
 
-namespace suas_planning{
+namespace suas_planning {
 
 bool operator<(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
 bool operator>(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
