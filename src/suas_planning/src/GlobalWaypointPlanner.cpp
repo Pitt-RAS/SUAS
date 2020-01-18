@@ -98,4 +98,38 @@ int GlobalWaypointPlanner::UpdateMap(std::vector<Obstacle>& obstacles) {
     return obstacles.size();
 }
 
+GlobalWaypointPlanner::Node::Node(int x, int y, Waypoint& goal, int action, Node& from, GlobalWaypointPlanner& planner) :
+    x_(x),
+    y_(y),
+    action_(action),
+    goal_(goal),
+    from_(from),
+    g_cost_(action_cost[action]),
+    parent_(planner) {
+        h_cost_ = ComputeHeuristicCost();
+        f_cost_ = g_cost_ + h_cost_;
+}
+
+double GlobalWaypointPlanner::Node::ComputeHeuristicCost() { 
+    double dx = goal_.x_ - x_;
+    double dy = goal_.y_ - y_;
+    return sqrt((dx * dx) + (dy * dy));
+}
+
+bool operator<(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs) {
+        return lhs.f_cost_ < rhs.f_cost_;
+}
+
+bool operator>(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs) {
+    return rhs < lhs;
+}
+
+bool operator<=(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs) {
+    return !(lhs > rhs);
+}
+
+bool operator>=(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs) {
+    return !(lhs < rhs);
+}
+
 }

@@ -11,6 +11,11 @@
 
 namespace suas_planning{
 
+bool operator<(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
+bool operator>(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
+bool operator<=(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
+bool operator>=(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
+
 class GlobalWaypointPlanner {
     public:
         GlobalWaypointPlanner(
@@ -29,6 +34,23 @@ class GlobalWaypointPlanner {
         void SetVehicleRadius(double radius);
         void AddObstacles(std::vector<Obstacle> obstacles);
         void AddWaypoints(std::vector<Waypoint> waypoints);
+        std::vector<std::string> GeneratePlan();
+
+        class Node {
+            public:
+                Node(int x, int y, Waypoint& goal, int action, Node& from, GlobalWaypointPlanner& planner);
+                int x_;
+                int y_;
+                int action_;
+                Waypoint& goal_;
+                Node& from_;
+                double h_cost_;
+                double g_cost_;
+                double f_cost_;
+            private:
+                GlobalWaypointPlanner& parent_;
+                double ComputeHeuristicCost();
+        };
 
     private:
         GlobalWaypointPlanner();
