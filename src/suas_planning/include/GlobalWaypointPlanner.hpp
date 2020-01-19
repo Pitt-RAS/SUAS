@@ -47,6 +47,7 @@ class GlobalWaypointPlanner {
                 double h_cost_;
                 double g_cost_;
                 double f_cost_;
+                int hash();
             private:
                 GlobalWaypointPlanner& parent_;
                 double ComputeHeuristicCost();

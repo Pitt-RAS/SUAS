@@ -33,12 +33,12 @@ void GlobalWaypointPlanner::ExpandObstaclesByRadius(std::vector<Obstacle>& obsta
 }
 
 // not meant to be used prior to ComputeMapSize
-// This is probably a terrible way of doing this, maybe just have obstacles be copied instead 
+// This is probably a terrible way of doing this, maybe just have obstacles be copied instead
 // of being passed by reference.
 unsigned int GlobalWaypointPlanner::ComputeMapWidth(std::vector<Obstacle>& obstacles) {
     int min_x = start_.x_;
     int max_x = goal_.x_;
-    
+
     // iterate through obstacles to compute maximum size
     std::vector<Obstacle>::iterator obstacle_it;
     for (obstacle_it = obstacles.begin(); obstacle_it != obstacles.end(); obstacle_it++) {
@@ -57,12 +57,12 @@ unsigned int GlobalWaypointPlanner::ComputeMapWidth(std::vector<Obstacle>& obsta
 }
 
 // not meant to be used prior to ComputeMapSize
-// This is probably a terrible way of doing this, maybe just have obstacles be copied instead 
+// This is probably a terrible way of doing this, maybe just have obstacles be copied instead
 // of being passed by reference.
 unsigned int GlobalWaypointPlanner::ComputeMapHeight(std::vector<Obstacle>& obstacles) {
     int min_y = start_.y_;
     int max_y = goal_.y_;
-    
+
     // iterate through obstacles to compute maximum size
     std::vector<Obstacle>::iterator obstacle_it;
     for (obstacle_it = obstacles.begin(); obstacle_it != obstacles.end(); obstacle_it++) {
@@ -110,12 +110,21 @@ GlobalWaypointPlanner::Node::Node(int x, int y, Waypoint& goal, int action, Node
         f_cost_ = g_cost_ + h_cost_;
 }
 
-double GlobalWaypointPlanner::Node::ComputeHeuristicCost() { 
+double GlobalWaypointPlanner::Node::ComputeHeuristicCost() {
     double dx = goal_.x_ - x_;
     double dy = goal_.y_ - y_;
     return sqrt((dx * dx) + (dy * dy));
 }
 
+int GlobalWaypointPlanner::Node::hash() {
+    int hash = (x_ + parent_.map_meta_.width_) >> 1;
+    hash ^= ((y_ + parent_.map_meta_.width_) >> 1);
+    return hash;
+}
+
+// Need to do proper floating point comparison before full release.
+// Will implement ULP most likely as we will be dealing with mostly
+// Non-zero positive values.
 bool operator<(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs) {
         return lhs.f_cost_ < rhs.f_cost_;
 }
