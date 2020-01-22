@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker run --network host -it -t suas
+docker run --rm --network host -it -t suas
