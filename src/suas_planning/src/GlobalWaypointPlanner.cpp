@@ -1,6 +1,23 @@
 #include "GlobalWaypointPlanner.hpp"
 
+namespace std {
+    
+    template<> struct hash<suas_planning::GlobalWaypointPlanner::Node> {
+        std::size_t operator()(const suas_planning::GlobalWaypointPlanner::Node& node) const noexcept {
+            std::size_t h1 = (node.x_ + 0x7261735f) >> 1;
+            std:: size_t h2 = (node.y_ + 0x7261735f) >> 1;
+            return (h1 ^ h2) + (h1 << 6) + (h1 >> 2);
+        }
+    };
+    
+} // namespace std for std::hash injection
+
 namespace suas_planning {
+
+static const int NUM_ACTIONS = 8;
+static const int dX[NUM_ACTIONS] = {0, 0, 1, 1, 1, -1, -1, -1};
+static const int dY[NUM_ACTIONS] = {1, -1, 0, 1, -1, 0, 1, -1};
+static const double action_cost[NUM_ACTIONS] = {1, 1, 1, M_SQRT2, M_SQRT2, 1, M_SQRT2, M_SQRT2};
 
 GlobalWaypointPlanner::GlobalWaypointPlanner(
         ros::NodeHandle& nh,
@@ -17,10 +34,20 @@ GlobalWaypointPlanner::GlobalWaypointPlanner(
             resolution_(resolution),
             current_map_(ComputeMapSize(obstacles)),
             waypoints_(waypoints),
-            map_meta_(&current_map_, ComputeMapWidth(obstacles), ComputeMapHeight(obstacles)),
-            start_(start_x, start_y),
-            goal_(goal_x, goal_y) {
+            map_meta_(current_map_, ComputeMapWidth(obstacles), ComputeMapHeight(obstacles)),
+            start_((int) round(start_x), (int) round(start_y)),
+            goal_((int) round(goal_x), (int) round(goal_y)) {
         UpdateMap(obstacles);
+}
+
+std::vector<std::string> GeneratePlan() {
+    // Creates a Min Heap for A*/Shortest Path Search
+    std::priority_queue<
+        GlobalWaypointPlanner::Node,
+        std::vector<GlobalWaypointPlanner::Node>,
+        std::greater<GlobalWaypointPlanner::Node>> pq;
+    std::unordered_set<GlobalWaypointPlanner::Node> explored;
+
 }
 
 void GlobalWaypointPlanner::ExpandObstaclesByRadius(std::vector<Obstacle>& obstacles) {
@@ -110,16 +137,16 @@ GlobalWaypointPlanner::Node::Node(int x, int y, Waypoint& goal, int action, Node
         f_cost_ = g_cost_ + h_cost_;
 }
 
-double GlobalWaypointPlanner::Node::ComputeHeuristicCost() {
-    double dx = goal_.x_ - x_;
-    double dy = goal_.y_ - y_;
+double GlobalWaypointPlanner::Node::ComputeHeuristicCost() { 
+    double dx = (double) (goal_.x_ - x_);
+    double dy = (double) (goal_.y_ - y_);
     return sqrt((dx * dx) + (dy * dy));
 }
 
-int GlobalWaypointPlanner::Node::hash() {
-    int hash = (x_ + parent_.map_meta_.width_) >> 1;
-    hash ^= ((y_ + parent_.map_meta_.width_) >> 1);
-    return hash;
+int GlobalWaypointPlanner::Node::hash_code() {
+    int h1 = (x_ + 0x7261735f) >> 1;
+    int h2 = ((y_ + 0x7261735f) >> 1);
+    return (h1 ^ h2) + (h1 << 6) + (h1 >> 2);
 }
 
 // Need to do proper floating point comparison before full release.

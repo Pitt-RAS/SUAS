@@ -4,9 +4,9 @@
 #include <cinttypes>
 #include <ros/ros.h>
 #include <nav_msgs/OccupancyGrid.h>
-#include <memory>
 #include <vector>
-#include <tuple>
+#include <queue>
+#include <unordered_set>
 #include "PlanningPoints.hpp"
 
 namespace suas_planning {
@@ -47,7 +47,7 @@ class GlobalWaypointPlanner {
                 double h_cost_;
                 double g_cost_;
                 double f_cost_;
-                int hash();
+                int hash_code();
             private:
                 GlobalWaypointPlanner& parent_;
                 double ComputeHeuristicCost();
@@ -55,7 +55,6 @@ class GlobalWaypointPlanner {
 
     private:
         GlobalWaypointPlanner();
-        double ComputeHeuristicCost(int x, int y);
         void ExpandObstaclesByRadius(std::vector<Obstacle>& obstacles);
         unsigned int ComputeMapSize(std::vector<Obstacle>& obstacles);
         unsigned int ComputeMapWidth(std::vector<Obstacle>& obstacles);

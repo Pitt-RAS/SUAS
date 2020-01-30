@@ -10,10 +10,10 @@ namespace suas_planning {
 class MapMetaInfo {
     public:
         MapMetaInfo(); // temporary until I figure out a way to make this private and not have a class call this
-        MapMetaInfo(std::vector<int8_t>* map, unsigned int width, unsigned int height);
+        MapMetaInfo(std::vector<int8_t>& map, unsigned int width, unsigned int height);
         unsigned int width_;
         unsigned int height_;
-        std::vector<int8_t>* map_for_;
+        std::vector<int8_t>& map_for_;
     private:
 };
 
