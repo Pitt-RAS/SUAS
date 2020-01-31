@@ -205,3 +205,6 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+add_executable(global_planner_node src/GlobalPlannerNode.cpp)
+target_link_libraries(global_planner_node ${catkin_LIBRARIES})
