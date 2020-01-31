@@ -1,0 +1,101 @@
+diff --git a/Dockerfile b/Dockerfile
+index d499c4450d..6b8bbbe5b8 100644
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -12,11 +12,14 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install --no-instal
+     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+ 
+ ENV USER=ardupilot
++ENV DOCKER=y
+ ADD . /ardupilot
+ RUN chown -R ardupilot:ardupilot /ardupilot && \
+     bash -c "Tools/environment_install/install-prereqs-ubuntu.sh -y && apt-get install gcc-arm-none-eabi -y" && \
+     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+ 
++
++
+ USER ardupilot
+ ENV CCACHE_MAXSIZE=1G
+-ENV PATH /usr/lib/ccache:/ardupilot/Tools:${PATH}
++ENV PATH /usr/lib/ccache:/ardupilot/Tools/autotest:/ardupilot/.local/bin:${PATH}
+diff --git a/Tools/environment_install/install-prereqs-ubuntu.sh b/Tools/environment_install/install-prereqs-ubuntu.sh
+index ee90b3bb66..8b4ea3af61 100755
+--- a/Tools/environment_install/install-prereqs-ubuntu.sh
++++ b/Tools/environment_install/install-prereqs-ubuntu.sh
+@@ -3,6 +3,11 @@ echo "---------- $0 start ----------"
+ set -e
+ set -x
+ 
++if [ $DOCKER == 'y' ] ; then
++  HOME=/ardupilot
++  USER=ardupilot
++fi
++
+ OPT="/opt"
+ BASE_PKGS="build-essential ccache g++ gawk git make wget"
+ PYTHON_PKGS="future lxml pymavlink MAVProxy pexpect"
+@@ -97,7 +102,11 @@ if [ -n "$RP" ]; then
+ fi
+ 
+ $APT_GET install $BASE_PKGS $SITL_PKGS $PX4_PKGS $ARM_LINUX_PKGS
+-pip2 -q install --user -U $PYTHON_PKGS
++if [ $DOCKER == 'y' ] ; then
++  su - ardupilot -c "pip -q install --user -U $PYTHON_PKGS"
++else
++  pip -q install --user -U $PYTHON_PKGS
++fi
+ 
+ if [ ! -d $OPT/$ARM_ROOT ]; then
+     (
+@@ -112,9 +121,9 @@ SCRIPT_DIR=$(dirname $(realpath ${BASH_SOURCE[0]}))
+ ARDUPILOT_ROOT=$(realpath "$SCRIPT_DIR/../../")
+ 
+ exportline="export PATH=$OPT/$ARM_ROOT/bin:\$PATH";
+-grep -Fxq "$exportline" ~/.profile 2>/dev/null || {
++grep -Fxq "$exportline" $HOME/.profile 2>/dev/null || {
+     if maybe_prompt_user "Add $OPT/$ARM_ROOT/bin to your PATH [N/y]?" ; then
+-        echo $exportline >> ~/.profile
++        echo $exportline >> $HOME/.profile
+         eval $exportline
+     else
+         echo "Skipping adding $OPT/$ARM_ROOT/bin to PATH."
+@@ -122,9 +131,9 @@ grep -Fxq "$exportline" ~/.profile 2>/dev/null || {
+ }
+ 
+ exportline2="export PATH=$ARDUPILOT_ROOT/$ARDUPILOT_TOOLS:\$PATH";
+-grep -Fxq "$exportline2" ~/.profile 2>/dev/null || {
++grep -Fxq "$exportline2" $HOME/.profile 2>/dev/null || {
+     if maybe_prompt_user "Add $ARDUPILOT_ROOT/$ARDUPILOT_TOOLS to your PATH [N/y]?" ; then
+-        echo $exportline2 >> ~/.profile
++        echo $exportline2 >> $HOME/.profile
+         eval $exportline2
+     else
+         echo "Skipping adding $ARDUPILOT_ROOT/$ARDUPILOT_TOOLS to PATH."
+diff --git a/modules/ChibiOS b/modules/ChibiOS
+deleted file mode 160000
+index 0997003f02..0000000000
+--- a/modules/ChibiOS
++++ /dev/null
+@@ -1 +0,0 @@
+-Subproject commit 0997003f024fdccf24dcf0170cb11b0ab8085881
+diff --git a/modules/gbenchmark b/modules/gbenchmark
+deleted file mode 160000
+index 006d23ccca..0000000000
+--- a/modules/gbenchmark
++++ /dev/null
+@@ -1 +0,0 @@
+-Subproject commit 006d23ccca1375a973b7fae0cc351cedb41b812a
+diff --git a/modules/libcanard b/modules/libcanard
+deleted file mode 160000
+index 99163fc236..0000000000
+--- a/modules/libcanard
++++ /dev/null
+@@ -1 +0,0 @@
+-Subproject commit 99163fc2369e5e5f75f8473f0b950b3418830d3f
+diff --git a/modules/uavcan b/modules/uavcan
+deleted file mode 160000
+index 3ef4b88d96..0000000000
+--- a/modules/uavcan
++++ /dev/null
+@@ -1 +0,0 @@
+-Subproject commit 3ef4b88d96466bbcf886f74d0ae169a4c8c1bdb0

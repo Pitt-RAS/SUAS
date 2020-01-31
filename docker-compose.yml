@@ -1,0 +1,17 @@
+version: "3.4"
+services:
+  ardupilot:
+    build:
+      context: .
+      dockerfile: ardupilot.dockerfile
+    image: ardupilot:docker-patch
+    container_name: ardupilot
+    restart: always
+    stdin_open: true
+    tty: true
+    networks:
+      - ros-network
+    command: sim_vehicle.py --console -v ArduPlane
+networks:
+  ros-network:
+    driver: bridge
