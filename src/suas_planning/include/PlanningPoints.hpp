@@ -14,7 +14,6 @@ class MapMetaInfo {
         unsigned int width_;
         unsigned int height_;
         std::vector<int8_t>& map_for_;
-    private:
 };
 
 class Obstacle {
@@ -22,7 +21,9 @@ class Obstacle {
         Obstacle();
         Obstacle(double x, double y);
         static bool CheckGridBounds(std::vector<int8_t>& map, int x, int y, MapMetaInfo map_meta);
-        static inline int GetLinearIndex(int row, int col, int rows);
+        static inline int GetLinearIndex(int row, int col, int columns) {
+            return (row * columns) + col;
+        };
         virtual void PlotObstacle(std::vector<int8_t>& map, MapMetaInfo map_meta);
         virtual int ExpandSize(double vehicle_radius);
         virtual int GetMinX();

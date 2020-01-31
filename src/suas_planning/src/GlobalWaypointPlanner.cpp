@@ -27,27 +27,21 @@ GlobalWaypointPlanner::GlobalWaypointPlanner(
         double goal_y,
         std::vector<Obstacle> obstacles,
         std::vector<Waypoint> waypoints,
-        double radius=1.0,
-        double resolution=1.0) :
+        double radius,
+        double resolution) :
             nh_(nh),
-            vehicle_radius_(radius),
-            resolution_(resolution),
             current_map_(ComputeMapSize(obstacles)),
             waypoints_(waypoints),
             map_meta_(current_map_, ComputeMapWidth(obstacles), ComputeMapHeight(obstacles)),
             start_((int) round(start_x), (int) round(start_y)),
-            goal_((int) round(goal_x), (int) round(goal_y)) {
+            goal_((int) round(goal_x), (int) round(goal_y)),
+            vehicle_radius_(radius),
+            resolution_(resolution) {
         UpdateMap(obstacles);
 }
 
 std::vector<std::string> GeneratePlan() {
-    // Creates a Min Heap for A*/Shortest Path Search
-    std::priority_queue<
-        GlobalWaypointPlanner::Node,
-        std::vector<GlobalWaypointPlanner::Node>,
-        std::greater<GlobalWaypointPlanner::Node>> pq;
-    std::unordered_set<GlobalWaypointPlanner::Node> explored;
-
+    return {""};
 }
 
 void GlobalWaypointPlanner::ExpandObstaclesByRadius(std::vector<Obstacle>& obstacles) {

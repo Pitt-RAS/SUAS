@@ -10,10 +10,6 @@ Obstacle::Obstacle(double x, double y) :
     center_x_((int) round(x)),
     center_y_((int) round(y)) {}
 
-inline int Obstacle::GetLinearIndex(int row, int col, int columns) {
-    return (row * columns) + col;
-}
-
 bool Obstacle::CheckGridBounds(std::vector<int8_t>& map, int x, int y, MapMetaInfo map_meta) {
     int width = map_meta.width_;
     int height = map_meta.height_;
@@ -23,6 +19,11 @@ bool Obstacle::CheckGridBounds(std::vector<int8_t>& map, int x, int y, MapMetaIn
         return false;
     }
     return true;
+}
+
+void Obstacle::PlotObstacle(std::vector<int8_t>& map, MapMetaInfo map_meta) {
+    int index = Obstacle::GetLinearIndex(center_y_, center_x_, map_meta.width_);
+    map[index] = 100;
 }
 
 int Obstacle::ExpandSize(double vehicle_radius) {
@@ -45,5 +46,6 @@ int Obstacle::GetMaxY() {
     return center_y_;
 }
 
+Obstacle::~Obstacle() {}
 
 }

@@ -7,14 +7,10 @@
 #include <vector>
 #include <queue>
 #include <unordered_set>
+
 #include "PlanningPoints.hpp"
 
 namespace suas_planning {
-
-bool operator<(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
-bool operator>(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
-bool operator<=(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
-bool operator>=(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
 
 class GlobalWaypointPlanner {
     public:
@@ -65,13 +61,18 @@ class GlobalWaypointPlanner {
         std::vector<Waypoint> waypoints_;
         ros::Subscriber map_subscriber_;
         ros::Publisher plan_publisher_;
-        MapMetaInfo::MapMetaInfo map_meta_;
-        Waypoint::Waypoint start_;
-        Waypoint::Waypoint goal_;
-        double resolution_;
+        MapMetaInfo map_meta_;
+        Waypoint start_;
+        Waypoint goal_;
         double vehicle_radius_;
+        double resolution_;
 
 };
+
+bool operator<(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
+bool operator>(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
+bool operator<=(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
+bool operator>=(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
 
 }
 
