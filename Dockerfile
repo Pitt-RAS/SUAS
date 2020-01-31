@@ -35,3 +35,4 @@ ENV DEBIAN_FRONTEND dialog
 USER $USERNAME
 
 ENTRYPOINT ["/catkin_ws/src/entrypoint.sh"]
+CMD bash
