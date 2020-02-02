@@ -53,8 +53,8 @@ class CircularObstacle: public Obstacle {
 class Waypoint {
     public:
         Waypoint(double x, double y);
-        unsigned int x_;
-        unsigned int y_;
+        int x_;
+        int y_;
     private:
         Waypoint();
 };

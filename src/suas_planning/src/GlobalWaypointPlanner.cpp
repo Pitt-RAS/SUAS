@@ -2,10 +2,11 @@
 
 namespace std {
     
+    // Custom hash for Node; hex number if a magic number to make sure more uniform distribution
     template<> struct hash<suas_planning::GlobalWaypointPlanner::Node> {
         std::size_t operator()(const suas_planning::GlobalWaypointPlanner::Node& node) const noexcept {
             std::size_t h1 = (node.x_ + 0x7261735f) >> 1;
-            std:: size_t h2 = (node.y_ + 0x7261735f) >> 1;
+            std::size_t h2 = (node.y_ + 0x7261735f) >> 1;
             return (h1 ^ h2) + (h1 << 6) + (h1 >> 2);
         }
     };
@@ -14,35 +15,87 @@ namespace std {
 
 namespace suas_planning {
 
+static const int NO_ACTION = -1;
 static const int NUM_ACTIONS = 8;
 static const int dX[NUM_ACTIONS] = {0, 0, 1, 1, 1, -1, -1, -1};
 static const int dY[NUM_ACTIONS] = {1, -1, 0, 1, -1, 0, 1, -1};
 static const double action_cost[NUM_ACTIONS] = {1, 1, 1, M_SQRT2, M_SQRT2, 1, M_SQRT2, M_SQRT2};
 
 GlobalWaypointPlanner::GlobalWaypointPlanner(
-        ros::NodeHandle& nh,
-        double start_x,
-        double start_y,
-        double goal_x,
-        double goal_y,
-        std::vector<Obstacle> obstacles,
-        std::vector<Waypoint> waypoints,
-        double radius,
-        double resolution) :
-            nh_(nh),
-            current_map_(ComputeMapSize(obstacles)),
-            waypoints_(waypoints),
-            map_meta_(current_map_, ComputeMapWidth(obstacles), ComputeMapHeight(obstacles)),
-            start_((int) round(start_x), (int) round(start_y)),
-            goal_((int) round(goal_x), (int) round(goal_y)),
-            vehicle_radius_(radius),
-            resolution_(resolution) {
-        UpdateMap(obstacles);
+    ros::NodeHandle& nh,
+    double start_x,
+    double start_y,
+    double goal_x,
+    double goal_y,
+    std::vector<Obstacle> obstacles,
+    std::vector<Waypoint> waypoints,
+    double radius,
+    double resolution) :
+        nh_(nh),
+        current_map_(ComputeMapSize(obstacles)),
+        waypoints_(waypoints),
+        map_meta_(current_map_, ComputeMapWidth(obstacles), ComputeMapHeight(obstacles)),
+        start_((int) round(start_x), (int) round(start_y)),
+        goal_((int) round(goal_x), (int) round(goal_y)),
+        vehicle_radius_(radius),
+        resolution_(resolution) {
+    UpdateMap(obstacles);
 }
 
-std::vector<std::string> GeneratePlan() {
+/*
+ * Generates a route/plan for waypoints and goals
+ */
+std::vector<std::string> GlobalWaypointPlanner::GeneratePlan() {
+    Waypoint current_start = start_;
+    std::queue<Waypoint, std::deque<Waypoint>> sub_goals;
+    std::vector<std::string> sub_plans;
+    if (!sub_goals.size()) {
+        for (std::vector<Waypoint>::iterator waypoint_it = waypoints_.begin(); waypoint_it != waypoints_.end(); waypoint_it++) {
+            Waypoint curr_point = *waypoint_it;
+            sub_goals.push(curr_point);
+        }
+    }
+    sub_goals.push(goal_);
+    // Start iterating through the sub_goals and execute a from waypoints
+    while (sub_goals.size() > 0) {
+        // Get first item goal off and pop goal off stack
+        Waypoint current_goal = sub_goals.front();
+        sub_goals.pop();
+        std::shared_ptr<Node> goal = AStarSearch(current_start, current_goal);
+    }
+
     return {""};
 }
+
+/*
+ * Implements offline A* given start and sub goal
+ */
+GlobalWaypointPlanner::Node* GlobalWaypointPlanner::AStarSearch(Waypoint start, Waypoint goal) {
+    // lambda function to compare Node objects
+    auto node_compare = [] (const std::shared_ptr<Node>& a, const::std::shared_ptr<Node>& b) { return *a < *b; };
+    // Creates a Min Heap for A*/Shortest Path Search
+    std::priority_queue<
+        std::shared_ptr<Node>,
+        std::vector<std::shared_ptr<Node>>,
+        decltype(node_compare)> pq(node_compare);
+    std::unordered_set<Node, std::hash<Node>> explored;
+
+    // create node using starting waypoint and push that
+    std::shared_ptr<Node> current = std::make_shared<Node>(start_.x_, start.y_, goal, NO_ACTION, nullptr, *this);
+    explored.insert(*current);
+    pq.push(current);
+    for (int action = 0; action < NUM_ACTIONS; action++) {
+        int new_x = dX[action];
+        int new_y = dY[action];
+        if (Obstacle::CheckGridBounds(current_map_, new_x, new_y, map_meta_)) {
+            std::shared_ptr new_node = std::make_shared<Node>(new_x, new_y, goal, action, current, *this);
+        }
+    }
+
+
+    return std::make_shared<Node>();
+}
+
 
 void GlobalWaypointPlanner::ExpandObstaclesByRadius(std::vector<Obstacle>& obstacles) {
     std::vector<Obstacle>::iterator obstacle_it;
@@ -119,16 +172,27 @@ int GlobalWaypointPlanner::UpdateMap(std::vector<Obstacle>& obstacles) {
     return obstacles.size();
 }
 
-GlobalWaypointPlanner::Node::Node(int x, int y, Waypoint& goal, int action, Node& from, GlobalWaypointPlanner& planner) :
-    x_(x),
-    y_(y),
-    action_(action),
-    goal_(goal),
-    from_(from),
-    g_cost_(action_cost[action]),
-    parent_(planner) {
+GlobalWaypointPlanner::Node::Node(
+    int x,
+    int y,
+    const Waypoint& goal,
+    int action,
+    std::shared_ptr<Node>& from,
+    const GlobalWaypointPlanner& planner) :
+        x_(x),
+        y_(y),
+        action_(action),
+        goal_(goal),
+        from_(from),
+        parent_(planner) { 
+    if (action != NO_ACTION) {
+        g_cost_ = action_cost[action];
         h_cost_ = ComputeHeuristicCost();
         f_cost_ = g_cost_ + h_cost_;
+    } else {
+        // Special case for start node
+        f_cost_ = h_cost_ = g_cost_ = 0;
+    }
 }
 
 double GlobalWaypointPlanner::Node::ComputeHeuristicCost() { 
@@ -141,6 +205,10 @@ int GlobalWaypointPlanner::Node::hash_code() {
     int h1 = (x_ + 0x7261735f) >> 1;
     int h2 = ((y_ + 0x7261735f) >> 1);
     return (h1 ^ h2) + (h1 << 6) + (h1 >> 2);
+}
+
+bool GlobalWaypointPlanner::Node::IsGoal() {
+    return (x_ == goal_.x_) && (y_ == goal_.y_);
 }
 
 // Need to do proper floating point comparison before full release.

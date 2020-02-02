@@ -4,6 +4,7 @@
 #include <cinttypes>
 #include <ros/ros.h>
 #include <nav_msgs/OccupancyGrid.h>
+#include <memory>
 #include <vector>
 #include <queue>
 #include <unordered_set>
@@ -34,28 +35,37 @@ class GlobalWaypointPlanner {
 
         class Node {
             public:
-                Node(int x, int y, Waypoint& goal, int action, Node& from, GlobalWaypointPlanner& planner);
+                Node(
+                    int x,
+                    int y,
+                    const Waypoint& goal,
+                    int action,
+                    std::shared_ptr<Node>& from,
+                    const GlobalWaypointPlanner& planner
+                );
                 int x_;
                 int y_;
                 int action_;
-                Waypoint& goal_;
-                Node& from_;
+                const Waypoint& goal_;
+                std::shared_ptr<Node> from_;
                 double h_cost_;
                 double g_cost_;
                 double f_cost_;
                 int hash_code();
+                bool IsGoal();
             private:
-                GlobalWaypointPlanner& parent_;
+                const GlobalWaypointPlanner& parent_;
                 double ComputeHeuristicCost();
         };
 
     private:
-        GlobalWaypointPlanner();
+        GlobalWaypointPlanner() = delete;
         void ExpandObstaclesByRadius(std::vector<Obstacle>& obstacles);
         unsigned int ComputeMapSize(std::vector<Obstacle>& obstacles);
         unsigned int ComputeMapWidth(std::vector<Obstacle>& obstacles);
         unsigned int ComputeMapHeight(std::vector<Obstacle>& obstacles);
         int UpdateMap(std::vector<Obstacle>& obstacles);
+        std::shared_ptr<Node> AStarSearch(Waypoint start, Waypoint goal);
         ros::NodeHandle& nh_;
         std::vector<int8_t> current_map_;
         std::vector<Waypoint> waypoints_;
