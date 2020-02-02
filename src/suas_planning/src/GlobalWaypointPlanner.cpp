@@ -7,7 +7,23 @@ namespace std {
         std::size_t operator()(const suas_planning::GlobalWaypointPlanner::Node& node) const noexcept {
             std::size_t h1 = (node.x_ + 0x7261735f) >> 1;
             std::size_t h2 = (node.y_ + 0x7261735f) >> 1;
-            return (h1 ^ h2) + (h1 << 6) + (h1 >> 2);
+            std::size_t h3 = (node.action_ + 0x7261735f) >> 1;
+            std::size_t temp = (h1 ^ h2) + (h1 << 6) + (h1 >> 2);
+            return (temp ^ h3) + (temp << 6) + (h3 >> 2);
+        }
+    };
+
+    template<> struct equal_to<suas_planning::GlobalWaypointPlanner::Node> {
+        bool operator()(
+            const suas_planning::GlobalWaypointPlanner::Node& lhs,
+            const suas_planning::GlobalWaypointPlanner::Node& rhs
+        ) const noexcept {
+            bool x = lhs.x_ == rhs.y_;
+            bool y = lhs.y_ == rhs.y_;
+            bool action = lhs.action_ == rhs.action_;
+            bool from = lhs.from_ == rhs.from_;
+            bool goal = lhs.goal_ == rhs.goal_;
+            return x && y && action && from && goal;
         }
     };
     
@@ -69,8 +85,10 @@ std::vector<std::string> GlobalWaypointPlanner::GeneratePlan() {
 
 /*
  * Implements offline A* given start and sub goal
+ * Note due to the use of a unordered set with a priority queue as the frontier (probably should just subclass this);
+ * You need to first do operations on the pq_frontier unordered_set before pq (assuming you need to use std::move)
  */
-GlobalWaypointPlanner::Node* GlobalWaypointPlanner::AStarSearch(Waypoint start, Waypoint goal) {
+std::shared_ptr<GlobalWaypointPlanner::Node> GlobalWaypointPlanner::AStarSearch(Waypoint start, Waypoint goal) {
     // lambda function to compare Node objects
     auto node_compare = [] (const std::shared_ptr<Node>& a, const::std::shared_ptr<Node>& b) { return *a < *b; };
     // Creates a Min Heap for A*/Shortest Path Search
@@ -78,22 +96,43 @@ GlobalWaypointPlanner::Node* GlobalWaypointPlanner::AStarSearch(Waypoint start, 
         std::shared_ptr<Node>,
         std::vector<std::shared_ptr<Node>>,
         decltype(node_compare)> pq(node_compare);
-    std::unordered_set<Node, std::hash<Node>> explored;
+    std::unordered_set<Node, std::hash<Node>, std::equal_to<Node>> pq_frontier; // just a hack so we check the frontier for nodes ()
+    std::unordered_set<Node, std::hash<Node>, std::equal_to<Node>> explored;
 
-    // create node using starting waypoint and push that
-    std::shared_ptr<Node> current = std::make_shared<Node>(start_.x_, start.y_, goal, NO_ACTION, nullptr, *this);
-    explored.insert(*current);
-    pq.push(current);
-    for (int action = 0; action < NUM_ACTIONS; action++) {
-        int new_x = dX[action];
-        int new_y = dY[action];
-        if (Obstacle::CheckGridBounds(current_map_, new_x, new_y, map_meta_)) {
-            std::shared_ptr new_node = std::make_shared<Node>(new_x, new_y, goal, action, current, *this);
+    // create node using starting waypoint and push that onto related data sturcutres
+    auto current = std::make_shared<Node>(start_.x_, start.y_, goal, NO_ACTION, nullptr, *this);
+    pq_frontier.insert(*current);
+    pq.push(std::move(current));
+    while (pq.size()) {
+        // Pop the current node off of PQ and Frontier
+        std::shared_ptr<Node> current_node = pq.top();
+        pq_frontier.erase(*current_node);
+        pq.pop();
+
+        // Insert into explored
+        explored.insert(*current_node);
+        for (int action = 0; action < NUM_ACTIONS; action++) {
+            // Expand children for current node
+            int new_x = current_node->x_ + dX[action];
+            int new_y = current_node->y_ + dY[action];
+            bool in_bounds = Obstacle::CheckGridBounds(current_map_, new_x, new_y, map_meta_);
+            bool is_free = Obstacle::IsFree(current_map_, new_x, new_y, map_meta_);
+            if (in_bounds && is_free) {
+                auto child_node = std::make_shared<Node>(new_x, new_y, goal, action, current, *this);
+                if (explored.find(*child_node) != explored.end() ||
+                    pq_frontier.find(*child_node) != pq_frontier.end()) {
+                    if (child_node->IsGoal()) {
+                        // Found a solution, return it back up for processing
+                        return child_node;
+                    }
+                    pq_frontier.insert(*child_node);
+                    pq.push(std::move(child_node));
+                }
+            }
         }
     }
 
-
-    return std::make_shared<Node>();
+    return nullptr;
 }
 
 
@@ -177,8 +216,8 @@ GlobalWaypointPlanner::Node::Node(
     int y,
     const Waypoint& goal,
     int action,
-    std::shared_ptr<Node>& from,
-    const GlobalWaypointPlanner& planner) :
+    std::shared_ptr<Node> from,
+    GlobalWaypointPlanner& planner) :
         x_(x),
         y_(y),
         action_(action),

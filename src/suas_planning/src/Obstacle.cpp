@@ -21,6 +21,13 @@ bool Obstacle::CheckGridBounds(std::vector<int8_t>& map, int x, int y, MapMetaIn
     return true;
 }
 
+// Assumes that any non-zero value indicates a potential collision
+bool Obstacle::IsFree(std::vector<int8_t>& map, int x, int y, MapMetaInfo map_meta) {
+    int width = map_meta.width_;
+    int index = GetLinearIndex(y, x, width);
+    return map[index] == 0;
+}
+
 void Obstacle::PlotObstacle(std::vector<int8_t>& map, MapMetaInfo map_meta) {
     int index = Obstacle::GetLinearIndex(center_y_, center_x_, map_meta.width_);
     map[index] = 100;

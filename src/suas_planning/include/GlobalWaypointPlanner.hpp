@@ -40,8 +40,8 @@ class GlobalWaypointPlanner {
                     int y,
                     const Waypoint& goal,
                     int action,
-                    std::shared_ptr<Node>& from,
-                    const GlobalWaypointPlanner& planner
+                    std::shared_ptr<Node> from,
+                    GlobalWaypointPlanner& planner
                 );
                 int x_;
                 int y_;
@@ -54,7 +54,7 @@ class GlobalWaypointPlanner {
                 int hash_code();
                 bool IsGoal();
             private:
-                const GlobalWaypointPlanner& parent_;
+                GlobalWaypointPlanner& parent_;
                 double ComputeHeuristicCost();
         };
 

@@ -21,6 +21,7 @@ class Obstacle {
         Obstacle();
         Obstacle(double x, double y);
         static bool CheckGridBounds(std::vector<int8_t>& map, int x, int y, MapMetaInfo map_meta);
+        static bool IsFree(std::vector<int8_t>& map, int x, int y, MapMetaInfo map_meta);
         static inline int GetLinearIndex(int row, int col, int columns) {
             return (row * columns) + col;
         };
@@ -58,6 +59,9 @@ class Waypoint {
     private:
         Waypoint();
 };
+
+bool operator==(const Waypoint& lhs, const Waypoint& rhs);
+bool operator!=(const Waypoint& lhs, const Waypoint& rhs);
 
 } // namespace suas_planning
 
