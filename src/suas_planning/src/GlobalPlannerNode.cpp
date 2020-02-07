@@ -6,8 +6,8 @@
 #include <ros/console.h>
 #include <signal.h>
 
-//namespace suas_planning
-//{
+#include "PlanningPoints.hpp"
+#include "GlobalWaypointPlanner.hpp"
     
 int main(int argc, char** argv)
 {
@@ -25,11 +25,31 @@ int main(int argc, char** argv)
 
     ROS_DEBUG_ONCE("hello suas");
 
-    std::cout << "hello suas" << std::endl;
+    double start_x;
+    double start_y;
+    double goal_x;
+    double goal_y;
+
+    start_x = start_y = 10;
+    goal_x = goal_y = 100;
+
+    std::vector<suas_planning::Obstacle> obstacles;
+    std::vector<suas_planning::Waypoint> waypoints;
+
+    obstacles.push_back(suas_planning::CircularObstacle(50, 50, 2));
+    waypoints.push_back(suas_planning::Waypoint(35, 35));
+    suas_planning::GlobalWaypointPlanner planner(
+        nh,
+        start_x,
+        start_y,
+        goal_x,
+        goal_y,
+        obstacles,
+        waypoints);
+
 
     ros::spin();
 
     return 0;
 }
 
-//} // namespace suas_planning

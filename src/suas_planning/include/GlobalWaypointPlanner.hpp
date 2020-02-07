@@ -65,7 +65,7 @@ class GlobalWaypointPlanner {
         unsigned int ComputeMapWidth(std::vector<Obstacle>& obstacles);
         unsigned int ComputeMapHeight(std::vector<Obstacle>& obstacles);
         int UpdateMap(std::vector<Obstacle>& obstacles);
-        std::shared_ptr<Node> AStarSearch(Waypoint start, Waypoint goal);
+        std::shared_ptr<GlobalWaypointPlanner::Node> AStarSearch(Waypoint start, Waypoint goal);
         ros::NodeHandle& nh_;
         std::vector<int8_t> current_map_;
         std::vector<Waypoint> waypoints_;
