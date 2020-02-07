@@ -11,7 +11,24 @@ services:
     tty: true
     networks:
       - ros-network
-    command: sim_vehicle.py --console -v ArduPlane
+    ports:
+      - "5760:5760" # Ardupilot master
+    command: bash # sim_vehicle.py --console -v ArduPlane -m --mav10 -I0
+  gazebo-sim:
+    build:
+      context: .
+      dockerfile: melodic-desktop.dockerfile
+    image: melodic-desktop:latest
+    container_name: gazebo-sim
+    restart: always
+    stdin_open: true
+    tty: true
+    networks:
+      - ros-network
+    ports:
+      - "11345:11345" # Gazebo master
+    command: gazebo
+    privileged: true
 networks:
   ros-network:
     driver: bridge
