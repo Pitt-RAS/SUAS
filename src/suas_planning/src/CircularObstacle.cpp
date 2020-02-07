@@ -19,7 +19,6 @@ CircularObstacle::CircularObstacle(double x, double y, double radius) {
 // preferentially rounding up to make sure we dont stray in.
 int CircularObstacle::ExpandSize(double vehicle_radius) {
     radius_ += (int) ceil(vehicle_radius);
-    return radius_;
 }
 
 // Implementation of the midpoint circle algorithm; Taken/Adapted from Wikipedia/Rosetta Code
@@ -58,7 +57,7 @@ void CircularObstacle::PlotObstacle(std::vector<int8_t>& map, MapMetaInfo map_me
 // Note due to preference for x axis to be horizontal, the indexing into the
 // 2d array is [row][col]; [y][x]
 // Returns -1 if unable to plot plot
-int CircularObstacle::PlotPointProbability(std::vector<int8_t>& map, int x, int y, MapMetaInfo map_meta, int8_t prob) {
+int PlotPointProbablity(std::vector<int8_t>& map, int x, int y, MapMetaInfo map_meta, int8_t prob) {
     if (!Obstacle::CheckGridBounds(map, x, y, map_meta)) {
         return -1;
     }

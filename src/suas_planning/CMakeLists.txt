@@ -117,7 +117,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-  include
+# include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -206,13 +206,5 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-set(NODE_SOURCES
-  src/Obstacle.cpp
-  src/CircularObstacle.cpp
-  src/GlobalPlannerNode.cpp
-  src/MapMetaInfo.cpp
-  src/Waypoint.cpp
-  src/GlobalWaypointPlanner.cpp)
-
-add_executable(global_planner_node ${NODE_SOURCES})
+add_executable(global_planner_node src/GlobalPlannerNode.cpp)
 target_link_libraries(global_planner_node ${catkin_LIBRARIES})

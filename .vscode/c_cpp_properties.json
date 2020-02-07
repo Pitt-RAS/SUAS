@@ -8,7 +8,7 @@
             "includePath": [
                 "/opt/ros/melodic/include/**",
                 "/usr/include/**",
-                "${workspaceFolder}/src/**"
+                "${workspaceFolder}/src/suas_planning/include"
             ],
             "name": "ROS",
             "intelliSenseMode": "gcc-x64",
