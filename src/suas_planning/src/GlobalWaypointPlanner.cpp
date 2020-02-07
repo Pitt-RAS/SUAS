@@ -66,9 +66,8 @@ std::vector<std::string> GlobalWaypointPlanner::GeneratePlan() {
     std::queue<Waypoint, std::deque<Waypoint>> sub_goals;
     std::vector<std::string> sub_plans;
     if (!sub_goals.size()) {
-        for (std::vector<Waypoint>::iterator waypoint_it = waypoints_.begin(); waypoint_it != waypoints_.end(); waypoint_it++) {
-            Waypoint curr_point = *waypoint_it;
-            sub_goals.push(curr_point);
+        for (const Waypoint& waypoint : waypoints_) {;
+            sub_goals.push(waypoint);
         }
     }
     sub_goals.push(goal_);
