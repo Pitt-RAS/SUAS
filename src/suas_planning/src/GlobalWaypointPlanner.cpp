@@ -234,8 +234,8 @@ GlobalWaypointPlanner::Node::Node(
 }
 
 double GlobalWaypointPlanner::Node::ComputeHeuristicCost() { 
-    double dx = (double) (goal_.x_ - x_);
-    double dy = (double) (goal_.y_ - y_);
+    double dx = static_cast<double>(goal_.x_ - x_);
+    double dy = static_cast<double>(goal_.y_ - y_);
     return sqrt((dx * dx) + (dy * dy));
 }
 

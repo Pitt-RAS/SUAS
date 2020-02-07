@@ -9,16 +9,16 @@ CircularObstacle::CircularObstacle() {
 }
 
 CircularObstacle::CircularObstacle(double x, double y, double radius) {
-    center_x_ = (int) round(x);
-    center_y_ = (int) round(y);
-    radius_ = (int) round(radius);
+    center_x_ = static_cast<int>(round(x));
+    center_y_ = static_cast<int>(round(y));
+    radius_ = static_cast<int>(round(radius));
 }
 
 
 // expand radius of obstacle so we can treat vehicle a point object
 // preferentially rounding up to make sure we dont stray in.
 int CircularObstacle::ExpandSize(double vehicle_radius) {
-    radius_ += (int) ceil(vehicle_radius);
+    radius_ += static_cast<int>(ceil(vehicle_radius));
     return radius_;
 }
 

@@ -7,8 +7,8 @@ Obstacle::Obstacle() :
     center_y_(0) {}
 
 Obstacle::Obstacle(double x, double y) :
-    center_x_((int) round(x)),
-    center_y_((int) round(y)) {}
+    center_x_(static_cast<int>(round(x))),
+    center_y_(static_cast<int>(round(y))) {}
 
 bool Obstacle::CheckGridBounds(std::vector<int8_t>& map, int x, int y, MapMetaInfo map_meta) {
     int width = map_meta.width_;
