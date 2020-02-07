@@ -48,9 +48,9 @@ GlobalWaypointPlanner::GlobalWaypointPlanner(
     double radius,
     double resolution) :
         nh_(nh),
-        current_map_(ComputeMapSize(obstacles)),
+        current_map_(ComputeMapSize(obstacles, waypoints)),
         waypoints_(waypoints),
-        map_meta_(current_map_, ComputeMapWidth(obstacles), ComputeMapHeight(obstacles)),
+        map_meta_(current_map_, ComputeMapWidth(obstacles, waypoints), ComputeMapHeight(obstacles, waypoints)),
         start_((int) round(start_x), (int) round(start_y)),
         goal_((int) round(goal_x), (int) round(goal_y)),
         vehicle_radius_(radius),
@@ -147,57 +147,55 @@ void GlobalWaypointPlanner::ExpandObstaclesByRadius(std::vector<Obstacle>& obsta
 // not meant to be used prior to ComputeMapSize
 // This is probably a terrible way of doing this, maybe just have obstacles be copied instead
 // of being passed by reference.
-unsigned int GlobalWaypointPlanner::ComputeMapWidth(std::vector<Obstacle>& obstacles) {
-    int min_x = start_.x_;
-    int max_x = goal_.x_;
-
-    // iterate through obstacles to compute maximum size
-    std::vector<Obstacle>::iterator obstacle_it;
-    for (obstacle_it = obstacles.begin(); obstacle_it != obstacles.end(); obstacle_it++) {
-        Obstacle curr_obstacle = *obstacle_it;
-        int current_min_x = curr_obstacle.GetMinX();
-        int current_max_x = curr_obstacle.GetMaxX();
-        if (current_min_x < min_x) {
-            min_x = current_min_x;
-        }
-        if (current_max_x > max_x) {
-            max_x = current_max_x;
-        }
+unsigned int GlobalWaypointPlanner::ComputeMapWidth(
+        std::vector<Obstacle>& obstacles,
+        std::vector<Waypoint>& waypoints) {
+    std::vector<int> x_points = {start_.x_, goal_.x_};
+    // push back all y values for obstacles
+    for (Obstacle& obstacle : obstacles) {
+        x_points.push_back(obstacle.GetMinX());
+        x_points.push_back(obstacle.GetMaxX());
     }
-
-    return abs(max_x - min_x);
+    // push back all y values for waypoints
+    for (Waypoint& waypoint : waypoints_) {
+        x_points.push_back(waypoint.x_);
+        x_points.push_back(waypoint.x_);
+    }
+    // find smallest and largest x to compute range
+    const auto min_x = std::min_element(x_points.begin(), x_points.end());
+    const auto max_x = std::min_element(x_points.begin(), x_points.end());
+    return abs(*max_x - *min_x);
 }
 
 // not meant to be used prior to ComputeMapSize
 // This is probably a terrible way of doing this, maybe just have obstacles be copied instead
 // of being passed by reference.
-unsigned int GlobalWaypointPlanner::ComputeMapHeight(std::vector<Obstacle>& obstacles) {
-    int min_y = start_.y_;
-    int max_y = goal_.y_;
-
-    // iterate through obstacles to compute maximum size
-    std::vector<Obstacle>::iterator obstacle_it;
-    for (obstacle_it = obstacles.begin(); obstacle_it != obstacles.end(); obstacle_it++) {
-        Obstacle curr_obstacle = *obstacle_it;
-        int current_max_y = curr_obstacle.GetMaxY();
-        int current_min_y = curr_obstacle.GetMinY();
-        if (current_min_y < min_y) {
-            min_y = current_min_y;
-        }
-        if (current_max_y > max_y) {
-            max_y = current_max_y;
-        }
+unsigned int GlobalWaypointPlanner::ComputeMapHeight(
+        std::vector<Obstacle>& obstacles,
+        std::vector<Waypoint>& waypoints) {
+    std::vector<int> y_points = {start_.y_, goal_.y_};
+    // push back all y values for obstacles
+    for (Obstacle& obstacle : obstacles) {
+        y_points.push_back(obstacle.GetMinY());
+        y_points.push_back(obstacle.GetMaxY());
     }
-
-    return abs(max_y - min_y);
+    // push back all y values for waypoints
+    for (Waypoint& waypoint : waypoints_) {
+        y_points.push_back(waypoint.y_);
+        y_points.push_back(waypoint.y_);
+    }
+    // find smallest and largest y to compute range
+    const auto min_y = std::min_element(y_points.begin(), y_points.end());
+    const auto max_y = std::min_element(y_points.begin(), y_points.end());
+    return abs(*max_y - *min_y);
 }
 
 // note to self: this is slightly flawed probably, everything needs to be reference to an absolute
 // reference, which I don't know yet; also this could be O(n) but for now we leave it as O(n^2)
-unsigned int GlobalWaypointPlanner::ComputeMapSize(std::vector<Obstacle>& obstacles) {
+unsigned int GlobalWaypointPlanner::ComputeMapSize(std::vector<Obstacle>& obstacles, std::vector<Waypoint>& waypoints) {
     ExpandObstaclesByRadius(obstacles);
-    int width = ComputeMapWidth(obstacles);
-    int height = ComputeMapHeight(obstacles);
+    int width = ComputeMapWidth(obstacles, waypoints);
+    int height = ComputeMapHeight(obstacles, waypoints);
     return width * height;
 }
 

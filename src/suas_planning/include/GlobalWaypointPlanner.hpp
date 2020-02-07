@@ -8,6 +8,7 @@
 #include <vector>
 #include <queue>
 #include <unordered_set>
+#include <algorithm>
 
 #include "PlanningPoints.hpp"
 
@@ -61,9 +62,9 @@ class GlobalWaypointPlanner {
     private:
         GlobalWaypointPlanner() = delete;
         void ExpandObstaclesByRadius(std::vector<Obstacle>& obstacles);
-        unsigned int ComputeMapSize(std::vector<Obstacle>& obstacles);
-        unsigned int ComputeMapWidth(std::vector<Obstacle>& obstacles);
-        unsigned int ComputeMapHeight(std::vector<Obstacle>& obstacles);
+        unsigned int ComputeMapSize(std::vector<Obstacle>& obstacles, std::vector<Waypoint>& waypoints);
+        unsigned int ComputeMapWidth(std::vector<Obstacle>& obstacles, std::vector<Waypoint>& waypoints);
+        unsigned int ComputeMapHeight(std::vector<Obstacle>& obstacles, std::vector<Waypoint>& waypoints);
         int UpdateMap(std::vector<Obstacle>& obstacles);
         std::shared_ptr<GlobalWaypointPlanner::Node> AStarSearch(Waypoint start, Waypoint goal);
         ros::NodeHandle& nh_;
