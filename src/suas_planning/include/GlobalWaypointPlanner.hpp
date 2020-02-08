@@ -6,15 +6,13 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <memory>
 #include <vector>
-#include <tuple>
+#include <queue>
+#include <unordered_set>
+#include <algorithm>
+
 #include "PlanningPoints.hpp"
 
 namespace suas_planning {
-
-bool operator<(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
-bool operator>(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
-bool operator<=(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
-bool operator>=(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
 
 class GlobalWaypointPlanner {
     public:
@@ -38,41 +36,54 @@ class GlobalWaypointPlanner {
 
         class Node {
             public:
-                Node(int x, int y, Waypoint& goal, int action, Node& from, GlobalWaypointPlanner& planner);
+                Node(
+                    int x,
+                    int y,
+                    const Waypoint& goal,
+                    int action,
+                    std::shared_ptr<Node> from,
+                    GlobalWaypointPlanner& planner
+                );
                 int x_;
                 int y_;
                 int action_;
-                Waypoint& goal_;
-                Node& from_;
+                const Waypoint& goal_;
+                std::shared_ptr<Node> from_;
                 double h_cost_;
                 double g_cost_;
                 double f_cost_;
-                int hash();
+                int hash_code();
+                bool IsGoal();
             private:
                 GlobalWaypointPlanner& parent_;
                 double ComputeHeuristicCost();
         };
 
     private:
-        GlobalWaypointPlanner();
-        double ComputeHeuristicCost(int x, int y);
+        GlobalWaypointPlanner() = delete;
         void ExpandObstaclesByRadius(std::vector<Obstacle>& obstacles);
-        unsigned int ComputeMapSize(std::vector<Obstacle>& obstacles);
-        unsigned int ComputeMapWidth(std::vector<Obstacle>& obstacles);
-        unsigned int ComputeMapHeight(std::vector<Obstacle>& obstacles);
+        unsigned int ComputeMapSize(std::vector<Obstacle>& obstacles, std::vector<Waypoint>& waypoints);
+        unsigned int ComputeMapWidth(std::vector<Obstacle>& obstacles, std::vector<Waypoint>& waypoints);
+        unsigned int ComputeMapHeight(std::vector<Obstacle>& obstacles, std::vector<Waypoint>& waypoints);
         int UpdateMap(std::vector<Obstacle>& obstacles);
+        std::shared_ptr<GlobalWaypointPlanner::Node> AStarSearch(Waypoint start, Waypoint goal);
         ros::NodeHandle& nh_;
         std::vector<int8_t> current_map_;
         std::vector<Waypoint> waypoints_;
         ros::Subscriber map_subscriber_;
         ros::Publisher plan_publisher_;
-        MapMetaInfo::MapMetaInfo map_meta_;
-        Waypoint::Waypoint start_;
-        Waypoint::Waypoint goal_;
-        double resolution_;
+        MapMetaInfo map_meta_;
+        Waypoint start_;
+        Waypoint goal_;
         double vehicle_radius_;
+        double resolution_;
 
 };
+
+bool operator<(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
+bool operator>(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
+bool operator<=(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
+bool operator>=(const GlobalWaypointPlanner::Node& lhs, const GlobalWaypointPlanner::Node& rhs);
 
 }
 

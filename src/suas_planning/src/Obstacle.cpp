@@ -7,12 +7,8 @@ Obstacle::Obstacle() :
     center_y_(0) {}
 
 Obstacle::Obstacle(double x, double y) :
-    center_x_((int) round(x)),
-    center_y_((int) round(y)) {}
-
-inline int Obstacle::GetLinearIndex(int row, int col, int columns) {
-    return (row * columns) + col;
-}
+    center_x_(static_cast<int>(round(x))),
+    center_y_(static_cast<int>(round(y))) {}
 
 bool Obstacle::CheckGridBounds(std::vector<int8_t>& map, int x, int y, MapMetaInfo map_meta) {
     int width = map_meta.width_;
@@ -23,6 +19,18 @@ bool Obstacle::CheckGridBounds(std::vector<int8_t>& map, int x, int y, MapMetaIn
         return false;
     }
     return true;
+}
+
+// Assumes that any non-zero value indicates a potential collision
+bool Obstacle::IsFree(std::vector<int8_t>& map, int x, int y, MapMetaInfo map_meta) {
+    int width = map_meta.width_;
+    int index = GetLinearIndex(y, x, width);
+    return map[index] == 0;
+}
+
+void Obstacle::PlotObstacle(std::vector<int8_t>& map, MapMetaInfo map_meta) {
+    int index = Obstacle::GetLinearIndex(center_y_, center_x_, map_meta.width_);
+    map[index] = 100;
 }
 
 int Obstacle::ExpandSize(double vehicle_radius) {
@@ -45,5 +53,6 @@ int Obstacle::GetMaxY() {
     return center_y_;
 }
 
+Obstacle::~Obstacle() {}
 
 }
