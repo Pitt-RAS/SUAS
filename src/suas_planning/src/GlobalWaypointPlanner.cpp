@@ -159,11 +159,10 @@ unsigned int GlobalWaypointPlanner::ComputeMapWidth(
     // push back all y values for waypoints
     for (Waypoint& waypoint : waypoints_) {
         x_points.push_back(waypoint.x_);
-        x_points.push_back(waypoint.x_);
     }
     // find smallest and largest x to compute range
     const auto min_x = std::min_element(x_points.begin(), x_points.end());
-    const auto max_x = std::min_element(x_points.begin(), x_points.end());
+    const auto max_x = std::max_element(x_points.begin(), x_points.end());
     return abs(*max_x - *min_x);
 }
 
@@ -182,11 +181,10 @@ unsigned int GlobalWaypointPlanner::ComputeMapHeight(
     // push back all y values for waypoints
     for (Waypoint& waypoint : waypoints_) {
         y_points.push_back(waypoint.y_);
-        y_points.push_back(waypoint.y_);
     }
     // find smallest and largest y to compute range
     const auto min_y = std::min_element(y_points.begin(), y_points.end());
-    const auto max_y = std::min_element(y_points.begin(), y_points.end());
+    const auto max_y = std::max_element(y_points.begin(), y_points.end());
     return abs(*max_y - *min_y);
 }
 
