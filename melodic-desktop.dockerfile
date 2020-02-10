@@ -29,3 +29,49 @@ RUN pip3 install catkin_pkg
 
 # Install GeographicLib datasets (MAVROS needs it for geo related items)
 RUN curl https://raw.githubusercontent.com/mavlink/mavros/master/mavros/scripts/install_geographiclib_datasets.sh | /bin/bash
+
+# Add gazebo user
+RUN useradd -U -d /home/gazebo gazebo && \
+    usermod -G users gazebo
+
+# Create home dir
+RUN mkdir -p /home/gazebo
+
+# Give ownership to gazebo user
+RUN chown -R gazebo:gazebo /home/gazebo
+
+USER gazebo
+
+# Move to home dir
+WORKDIR /home/gazebo
+
+# Pull down ardupilot-gazebo plugin
+RUN git clone https://github.com/SwiftGust/ardupilot_gazebo ./ardupilot-gazebo
+
+# Move into ardupilot-gazebo plugin sources
+WORKDIR /home/gazebo/ardupilot-gazebo
+
+# Checkout gazebo 9 tag
+RUN git checkout gazebo9
+
+# Remove the .hg files in the models because gazebo thinks its a model and looks for a model.config (which doesn't exist obviously)
+RUN rm -rf ./gazebo_models/.hg
+
+# Apply patch to change the ardupilot ip from 127.0.0.1 to ardupilot
+# COPY ardupilot-gazebo-change-uri.patch ./change-uri.patch
+# RUN git apply change-uri.patch
+
+# Copy over the setup.sh (meant to be sourced)
+COPY ./gazebo-setup.sh /home/gazebo/setup.sh
+
+RUN echo source /home/gazebo/setup.sh >> /home/gazebo/.bashrc
+
+# Open FDM ports
+EXPOSE 9002
+EXPOSE 9003
+
+RUN bash -c 'mkdir build && \
+        cd build && \
+        cmake .. && \
+        make -j4' # \
+        # gazebo --verbose ./gazebo_worlds/zephyr_ardupilot_demo.world
