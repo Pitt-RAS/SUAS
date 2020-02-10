@@ -9,26 +9,28 @@ services:
     restart: always
     stdin_open: true
     tty: true
-    networks:
-      - ros-network
+    # networks:
+    # - ros-network
+    network_mode: "host"
     ports:
       - "5760:5760" # Ardupilot master
-    command: sim_vehicle.py --console -v ArduPlane -m --mav10 -I0 # -f gazebo-zephyr
+    command: bash # sim_vehicle.py --console -v ArduPlane -I0 -f gazebo-zephyr --mav10 -m
   gazebo:
     build:
       context: .
-      dockerfile: melodic-desktop.dockerfile
-    image: melodic-desktop:latest
+      dockerfile: gazebo.dockerfile
+    image: gazebo:latest
     container_name: gazebo
     restart: always
     stdin_open: true
     tty: true
-    networks:
-      - ros-network
+    # networks:
+    #   - ros-network
+    network_mode: "host"
     ports:
       - "11345:11345" # Gazebo master
-      - "9002:9002" # gazebo fdm in
-      - "9003:9003" # gazebo fdm out
+      - "9002:9002/udp" # gazebo fdm in
+      - "9003:9003/udp" # gazebo fdm out
     environment:
       - QT_GRAPHICSSYSTEM=native
       - DISPLAY
@@ -37,6 +39,6 @@ services:
       - ~/.gazebo/:/home/gazebo/.gazebo/
     command: bash
     privileged: true # Access to device files for hardware acceleration) without having to specify for each platform (if that's even possible??)
-networks:
-  ros-network:
-    driver: bridge
+# networks:
+  # ros-network:
+    # driver: bridge
