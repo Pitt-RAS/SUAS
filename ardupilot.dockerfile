@@ -36,3 +36,6 @@ RUN ./waf plane
 
 # Open ardupilot master port
 EXPOSE 5760
+
+# Pull down wait-for-it.sh, we use this to stop ardupilot from running until it can communicate with gazebo
+RUN git clone https://github.com/vishnubob/wait-for-it /ardupilot/wait

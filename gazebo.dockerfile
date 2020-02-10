@@ -57,10 +57,6 @@ RUN git checkout gazebo9
 # Remove the .hg files in the models because gazebo thinks its a model and looks for a model.config (which doesn't exist obviously)
 RUN rm -rf ./gazebo_models/.hg
 
-# Apply patch to change the fdm ip
-# COPY ardupilot-gazebo-change-uri.patch ./change-uri.patch
-# RUN git apply change-uri.patch
-
 # Copy over the setup.sh (meant to be sourced)
 COPY ./gazebo-setup.sh /home/gazebo/setup.sh
 
