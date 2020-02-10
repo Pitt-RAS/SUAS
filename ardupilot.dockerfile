@@ -31,6 +31,8 @@ ENV CCACHE_MAXSIZE=1G
 ENV PATH /usr/lib/ccache:/ardupilot/Tools/autotest:/ardupilot/.local/bin:${PATH}
 
 # This should be dev mode only
-RUN ./waf configure --board sitl
+RUN ./waf configure --board=sitl
 RUN ./waf plane
+
+# Open ardupilot master port
 EXPOSE 5760
