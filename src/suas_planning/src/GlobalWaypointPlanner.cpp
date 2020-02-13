@@ -236,9 +236,7 @@ double GlobalWaypointPlanner::Node::ComputeHeuristicCost() {
 }
 
 int GlobalWaypointPlanner::Node::hash_code() {
-    int h1 = (x_ + 0x7261735f) >> 1;
-    int h2 = ((y_ + 0x7261735f) >> 1);
-    return (h1 ^ h2) + (h1 << 6) + (h1 >> 2);
+    return std::hash<Node>{}(*this);
 }
 
 bool GlobalWaypointPlanner::Node::IsGoal() {
