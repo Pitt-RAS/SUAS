@@ -26,7 +26,7 @@ WORKDIR /catkin_ws/src
 COPY src .
 COPY entrypoint.sh .
 RUN touch ./suas_sim/CATKIN_IGNORE \
-    && /bin/bash -c 'source /opt/ros/melodic/setup.sh && cd /catkin_ws && catkin_make' \
+    && /bin/bash -c 'source /opt/ros/melodic/setup.sh && cd /catkin_ws && catkin_make && catkin_make run_tests' \
     && chown -R $USERNAME:$USER_GID /catkin_ws \
     && echo "source /catkin_ws/devel/setup.sh" > /home/${USERNAME}/.bashrc \
     && chmod 0755 entrypoint.sh
