@@ -18,7 +18,7 @@ ENV DOCKER=y
 RUN git clone https://github.com/ArduPilot/ardupilot .
 RUN git checkout ArduPlane-stable
 
-COPY ardupilot-fix-docker.patch /ardupilot
+COPY docker/ardupilot-fix-docker.patch /ardupilot
 
 RUN git apply ardupilot-fix-docker.patch
 

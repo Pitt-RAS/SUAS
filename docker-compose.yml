@@ -3,7 +3,7 @@ services:
   ardupilot:
     build:
       context: .
-      dockerfile: ardupilot.dockerfile
+      dockerfile: docker/ardupilot.dockerfile
     image: ardupilot:docker-patch
     container_name: ardupilot
     restart: always
@@ -14,12 +14,12 @@ services:
     network_mode: "host"
     ports:
       - "5760:5760" # Ardupilot master
-    command: ["/ardupilot/wait/wait-for-it.sh", "gazebo:11345", "--", "sim_vehicle.py", "--console", "-v", "ArduPlane", "-I0", "-f", "gazebo-zephyr", "-m", "--mav10"]
+    command: ["/ardupilot/wait/wait-for-it.sh", "-t", "0", "localhost:11345", "--", "sim_vehicle.py", "--console", "-v", "ArduPlane", "-I0", "-f", "gazebo-zephyr", "-m", "--mav10"]
     # command: sim_vehicle.py --console -v ArduPlane -I0 -f gazebo-zephyr --mav10 -m
   gazebo:
     build:
       context: .
-      dockerfile: gazebo.dockerfile
+      dockerfile: docker/gazebo.dockerfile
     image: gazebo:latest
     container_name: gazebo
     restart: always

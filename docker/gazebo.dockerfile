@@ -58,7 +58,7 @@ RUN git checkout gazebo9
 RUN rm -rf ./gazebo_models/.hg
 
 # Copy over the setup.sh (meant to be sourced)
-COPY ./gazebo-setup.sh /home/gazebo/setup.sh
+COPY ./docker/gazebo-setup.sh /home/gazebo/setup.sh
 
 RUN echo source /home/gazebo/setup.sh >> /home/gazebo/.bashrc
 
