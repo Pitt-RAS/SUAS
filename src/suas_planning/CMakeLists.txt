@@ -210,6 +210,7 @@ target_link_libraries(global_planner_node ${catkin_LIBRARIES})
 
 # statically link
 add_library(global_planner_node_lib ${NODE_SOURCES})
+target_link_libraries(global_planner_node_lib ${catkin_LIBRARIES})
 
 ## Add gtest based cpp test target and link libraries
 catkin_add_gtest(${PROJECT_NAME}-test test/test_suas_planning.cpp)
