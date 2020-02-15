@@ -32,6 +32,11 @@ void CircularObstacle::PlotObstacle(std::vector<int8_t>& map, MapMetaInfo map_me
     int x = 0;
     int y = radius_;
 
+    PlotPointProbability(map, center_x_, center_y_ + y, map_meta);
+    PlotPointProbability(map, center_x_, center_y_ - y, map_meta);
+    PlotPointProbability(map, center_x_ + x, center_y_, map_meta);
+    PlotPointProbability(map, center_x_ - x, center_y_, map_meta);
+
     while (x < y) {
         if (f >= 0) {
             y--;
