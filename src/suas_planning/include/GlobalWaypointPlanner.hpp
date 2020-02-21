@@ -8,6 +8,7 @@
 #include <memory>
 #include <queue>
 #include <unordered_set>
+#include <sstream>
 #include <vector>
 
 #include "PlanningPoints.hpp"
@@ -31,6 +32,7 @@ class GlobalWaypointPlanner {
     void AddObstacles(std::vector<Obstacle> obstacles);
     void AddWaypoints(std::vector<Waypoint> waypoints);
     std::vector<std::string> GeneratePlan();
+    std::vector<std::string> GenerateExpandedPlan();
 
     class Node {
       public:

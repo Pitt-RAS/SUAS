@@ -72,14 +72,38 @@ std::vector<std::string> GlobalWaypointPlanner::GeneratePlan() {
     }
     sub_goals.push(goal_);
     // Start iterating through the sub_goals and execute a from waypoints
+    std::vector<std::string> action_strings;
     while (sub_goals.size() > 0) {
         // Get first item goal off and pop goal off stack
         Waypoint current_goal = sub_goals.front();
         sub_goals.pop();
         auto goal = AStarSearch(current_start, current_goal);
+
+        // start populating waypoints/generating waypoint plans
+        std::vector<std::string> waypoint_data;
+        Waypoint current_waypoint(goal->x_, goal->y_);
+        int current_action = goal->action_;
+        int path_length = 0;
+        std::shared_ptr<Node> current_node = goal->from_;
+        while (current_node != nullptr) {
+            if (current_node->action_ == current_action) {
+                path_length += 1;
+            } else {
+                std::stringstream plan_stream;
+                plan_stream <<  "{x:" << current_waypoint.x_ << ",y:" << current_waypoint.y_
+                            << ",action:" << current_action << ",length:" << path_length << "}";
+                waypoint_data.push_back(plan_stream.str());
+                current_waypoint.x_ = current_node->x_;
+                current_waypoint.y_ = current_node->y_;
+                current_action = current_node->action_;
+                path_length = 0;
+            }
+            current_node = current_node->from_;
+        }
+        action_strings.insert(action_strings.end(), waypoint_data.begin(), waypoint_data.end());
     }
 
-    return {""};
+    return action_strings;
 }
 
 /*
