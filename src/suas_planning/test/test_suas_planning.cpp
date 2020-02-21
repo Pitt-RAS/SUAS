@@ -12,9 +12,9 @@ class CircularObstacleTest : public testing::Test
 protected:
     void SetUp() override
     {
-        x = 8;
-        y = 8;
-        radius = 2;
+        x = 32;
+        y = 32;
+        radius = 12;
         map.resize(MAP_DIM * MAP_DIM);
         test_obst = suas_planning::CircularObstacle((double)x, (double)y, (double)radius);
         mmi = std::make_unique<suas_planning::MapMetaInfo>(map, MAP_DIM, MAP_DIM);
@@ -25,6 +25,7 @@ protected:
 
     }
 
+    // members
     std::vector<int8_t> map;
     std::unique_ptr<suas_planning::MapMetaInfo> mmi;
     suas_planning::CircularObstacle test_obst;
@@ -43,6 +44,14 @@ protected:
     };
 };
 
+TEST_F(CircularObstacleTest, TestGetLinearIndex)
+{
+    int expected_index = y * MAP_DIM + x;
+    EXPECT_EQ(expected_index, suas_planning::Obstacle::GetLinearIndex(y, x, MAP_DIM));
+    EXPECT_EQ(MAP_DIM, suas_planning::Obstacle::GetLinearIndex(1, 0, MAP_DIM));
+    EXPECT_EQ(0, suas_planning::Obstacle::GetLinearIndex(0, 0, MAP_DIM));
+}
+
 TEST_F(CircularObstacleTest, TestCheckBounds)
 {
     int x_min = x - radius;
@@ -58,34 +67,22 @@ TEST_F(CircularObstacleTest, TestCheckBounds)
 
 TEST_F(CircularObstacleTest, TestRasterize)
 {
-    test_obst.PlotObstacle(map, *mmi);
-    std::cout << "dump map" << std::endl;
-    for (int i = 0; i < MAP_DIM; i++)
-    {
-        for (int j = 0; j < MAP_DIM; j++)
-        {
-            std::cout << (int)map[i * MAP_DIM + j] << " ";
-        }
-        std::cout << std::endl;
-    }
-    int n = 0;
-    int hit = 0;
-    for (int i = 0; i < 8; i++)
-    {
-        for (int j = 0; j < 8; j++)
-        {
-            if ((int)map[i * 8 + j] == 1 && (int)(100 * reference[n]) == 1)
-            {
-                hit++;
-            }
-            n++;
-            std::cout << (int)map[i * 8 + j] << " ";
-        }
-        std::cout << std::endl;
-    }
 
-    std::cout << "hit: " << hit << "/" << "16" << std::endl;
-    EXPECT_EQ(hit, 16);
+    test_obst.PlotObstacle(map, *mmi);
+    int start_x = x - radius;
+    int start_y = y - radius;
+    int index = suas_planning::Obstacle::GetLinearIndex(y, x, MAP_DIM);
+    for (int i = 0; i < radius * 2 + 1; i++)
+    {
+        for (int j = 0; j < radius * 2 + 1; j++)
+        {
+            int v = (int)map[suas_planning::Obstacle::GetLinearIndex(start_y + i, start_x + j, MAP_DIM)] / 100;
+            std::cout << v << " ";
+
+            //EXPECT_EQ()
+        }
+        std::cout << std::endl;
+    }
 }
 
 int main(int argc, char** argv)
