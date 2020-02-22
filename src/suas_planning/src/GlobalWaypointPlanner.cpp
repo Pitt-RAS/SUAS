@@ -77,7 +77,7 @@ std::vector<std::string> GlobalWaypointPlanner::GeneratePlan() {
         // Get first item goal off and pop goal off stack
         Waypoint current_goal = sub_goals.front();
         sub_goals.pop();
-        auto goal = AStarSearch(current_start, current_goal);
+        std::shared_ptr<GlobalWaypointPlanner::Node> goal = AStarSearch(current_start, current_goal);
 
         // start populating waypoints/generating waypoint plans
         std::vector<std::string> waypoint_data;
