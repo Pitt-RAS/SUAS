@@ -66,7 +66,6 @@ std::vector<std::string> GlobalWaypointPlanner::GeneratePlan() {
     std::vector<std::string> sub_plans;
     if (!sub_goals.size()) {
         for (const Waypoint &waypoint : waypoints_) {
-            ;
             sub_goals.push(waypoint);
         }
     }
