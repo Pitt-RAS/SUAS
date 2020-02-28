@@ -32,16 +32,6 @@ protected:
     int x;
     int y;
     int radius;
-    const int8_t reference[64] = {
-        0,0,0,1,1,0,0,0,
-        0,0,1,0,0,1,0,0,
-        0,1,0,0,0,0,1,0,
-        1,0,0,0,0,0,0,1,
-        1,0,0,0,0,0,0,1,
-        0,1,0,0,0,0,1,0,
-        0,0,1,0,0,1,0,0,
-        0,0,0,1,1,0,0,0,
-    };
 };
 
 TEST_F(CircularObstacleTest, TestGetLinearIndex)
@@ -67,6 +57,7 @@ TEST_F(CircularObstacleTest, TestCheckBounds)
 
 TEST_F(CircularObstacleTest, TestRasterize)
 {
+    /* no equality checking, but circles can be visually confirmed */
 
     test_obst.PlotObstacle(map, *mmi);
     int start_x = x - radius;
@@ -78,8 +69,6 @@ TEST_F(CircularObstacleTest, TestRasterize)
         {
             int v = (int)map[suas_planning::Obstacle::GetLinearIndex(start_y + i, start_x + j, MAP_DIM)] / 100;
             std::cout << v << " ";
-
-            //EXPECT_EQ()
         }
         std::cout << std::endl;
     }
