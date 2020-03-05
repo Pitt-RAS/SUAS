@@ -27,7 +27,7 @@ RUN apt-get update \
     && apt-get -y install git openssh-client vim iproute2 procps lsb-release \
     #
     # Install C++ tools
-    && apt-get -y install build-essential cmake cppcheck valgrind \
+    && apt-get -y install build-essential cmake cppcheck valgrind clang-format \
     #
     # temporary addition of the rosserial install to verify items
     && apt-get install -y ros-melodic-rosserial \
