@@ -63,10 +63,10 @@ protected:
 
 TEST_F(CircularObstacleTest, TestGetLinearIndex)
 {
-    int expected_index = y * MAP_DIM + x;
-    EXPECT_EQ(expected_index, suas_planning::Obstacle::GetLinearIndex(y, x, MAP_DIM));
-    EXPECT_EQ(MAP_DIM, suas_planning::Obstacle::GetLinearIndex(1, 0, MAP_DIM));
-    EXPECT_EQ(0, suas_planning::Obstacle::GetLinearIndex(0, 0, MAP_DIM));
+    int asserted_index = y * MAP_DIM + x;
+    ASSERT_EQ(asserted_index, suas_planning::Obstacle::GetLinearIndex(y, x, MAP_DIM));
+    ASSERT_EQ(MAP_DIM, suas_planning::Obstacle::GetLinearIndex(1, 0, MAP_DIM));
+    ASSERT_EQ(0, suas_planning::Obstacle::GetLinearIndex(0, 0, MAP_DIM));
 }
 
 TEST_F(CircularObstacleTest, TestCheckBounds)
@@ -76,21 +76,21 @@ TEST_F(CircularObstacleTest, TestCheckBounds)
     int y_min = y - radius;
     int y_max = y + radius;
 
-    EXPECT_EQ(x_min, test_obst.GetMinX());
-    EXPECT_EQ(x_max, test_obst.GetMaxX());
-    EXPECT_EQ(y_min, test_obst.GetMinY());
-    EXPECT_EQ(y_max, test_obst.GetMaxY());
+    ASSERT_EQ(x_min, test_obst.GetMinX());
+    ASSERT_EQ(x_max, test_obst.GetMaxX());
+    ASSERT_EQ(y_min, test_obst.GetMinY());
+    ASSERT_EQ(y_max, test_obst.GetMaxY());
 }
 
 TEST_F(CircularObstacleTest, TestPosition)
 {
-    
+    test_obst.PlotObstacle(map, *mmi);
+    int index = suas_planning::Obstacle::GetLinearIndex(y, x, MAP_DIM);
+    ASSERT_EQ(map[index], 100);
 }
 
 TEST_F(CircularObstacleTest, TestRasterize)
 {
-    /* no equality checking, but circles can be visually confirmed */
-
     test_obst.PlotObstacle(map, *mmi);
     int start_x = x - radius;
     int start_y = y - radius;
@@ -102,11 +102,11 @@ TEST_F(CircularObstacleTest, TestRasterize)
         for (int j = 0; j < radius * 2 + 1; j++)
         {
             int v = (int)map[suas_planning::Obstacle::GetLinearIndex(start_y + i, start_x + j, MAP_DIM)] / 100;
-            EXPECT_EQ(v, reference[ri]);
+            ASSERT_EQ(v, reference[ri]);
             //std::cout << v << " ";
             ri++;
         }
-        std::cout << std::endl;
+        //std::cout << std::endl;
     }
 }
 
