@@ -193,19 +193,6 @@ include_directories(
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
-#############
-## Testing ##
-#############
-
-## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_suas_planning.cpp)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-# endif()
-
-## Add folders to be run by python nosetests
-# catkin_add_nosetests(test)
-
 set(NODE_SOURCES
   src/Obstacle.cpp
   src/CircularObstacle.cpp
@@ -216,3 +203,21 @@ set(NODE_SOURCES
 
 add_executable(global_planner_node ${NODE_SOURCES})
 target_link_libraries(global_planner_node ${catkin_LIBRARIES})
+
+#############
+## Testing ##
+#############
+
+# statically link
+add_library(global_planner_node_lib ${NODE_SOURCES})
+target_link_libraries(global_planner_node_lib ${catkin_LIBRARIES})
+
+## Add gtest based cpp test target and link libraries
+catkin_add_gtest(${PROJECT_NAME}-test test/test_suas_planning.cpp)
+if(TARGET ${PROJECT_NAME}-test)
+   target_link_libraries(${PROJECT_NAME}-test global_planner_node_lib)
+endif()
+
+## Add folders to be run by python nosetests
+# catkin_add_nosetests(test)
+
